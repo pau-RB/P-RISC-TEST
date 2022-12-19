@@ -1,7 +1,6 @@
-#define msz 16
+#include "./src/MMIO/mmio.h"
 
-int getchar();
-int putchar(int c);
+#define msz 16
 
 void mxm(int*A,int*B,int*C);
 
