@@ -1,0 +1,8 @@
+API/*.o
+MMIO/*.o
+build
+dump
+hex
+rv32-intermeidate.o
+rv32-init.o
+rv32-mxmhost.o
