@@ -1,7 +1,7 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
 
-#define MAX_THD 8
+#define MAX_THD 32
 #define FRAME_SIZE 128
 #define STACK_SIZE 128
 
@@ -12,6 +12,7 @@
 
 char child_stack[MAX_THD][STACK_SIZE]={1};
 char child_frame[MAX_THD][FRAME_SIZE]={1};
+int busy[MAX_THD]={1};
 
 typedef struct {
 	int r;
@@ -41,11 +42,11 @@ inline int modsq(Complex a)
 
 int inside(Complex c) {
 	Complex z = {0,0};
-	for(int i = 0; i < MAXITER; ++i) {
+	for(int i = 0; i < MAXITER; ++i)
 		if(modsq(z) > INFTY)
 			return 0;
-		z = add(mul(z,z),c);
-	}
+		else
+			z = add(mul(z,z),c);
 	return 1;
 }
 
@@ -78,10 +79,36 @@ int mandelbrot4(int l, int r, int b, int t) {
 
 }
 
+int mandelbrotN(int l, int r, int b, int t) {
+
+	int thd   = 0;
+	int total = 0;
+
+	for(thd = 0; thd < MAX_THD; ++thd)
+    	busy[thd] = 0;
+	
+	thd = 0;
+	for (int i = b; i < t; i+=STEP) {
+    	for (int j = l; j < r; j+=STEP) {
+    		if(busy[thd])
+    			{total += wait(child_frame[thd]); busy[thd] = 0;}
+    		fork2(j,i,(void*)inside,child_frame[thd],child_stack[thd]+STACK_SIZE); busy[thd] = 1;
+    		thd = (thd+1)%MAX_THD;
+    	}
+    }
+
+    for(thd = 0; thd < MAX_THD; ++thd)
+    	if(busy[thd])
+	    	total += wait(child_frame[thd]);
+
+    return total;
+}
+
+
 int main() {
 
 	printLSR('S');
-	int par = mandelbrot4(fromint(-2),fromint(1),fromint(-1),fromint(1));
+	int par = mandelbrotN(fromint(-2),fromint(1),fromint(-1),fromint(1));
     printLSR('E');
 
 	int seq = mandelbrot(fromint(-2),fromint(1),fromint(-1),fromint(1));
