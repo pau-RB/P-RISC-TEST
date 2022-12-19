@@ -15,13 +15,13 @@ RISCVCC32=riscv64-unknown-elf-gcc -O2 -march=rv32im -mabi=ilp32 -static -nostdli
 RISCVOBJD=riscv64-unknown-elf-objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 
 MXM_SOURCES=$(notdir $(wildcard $(MXMDIR)/*.S))
-MXM_ELF=$(addprefix build/rv32-mxm-,$(basename $(MXM_SOURCES)))
+MXM_ELF=$(addprefix $(BUILDDIR)/rv32-mxm-,$(basename $(MXM_SOURCES)))
 
 S_SOURCES=$(notdir $(wildcard $(SRCDIR)/*.S))
-S_ELF=$(addprefix build/rv32-s-,$(basename $(S_SOURCES)))
+S_ELF=$(addprefix $(BUILDDIR)/rv32-s-,$(basename $(S_SOURCES)))
 
 C_SOURCES=$(notdir $(wildcard $(SRCDIR)/*.c))
-C_ELF=$(addprefix build/rv32-c-,$(basename $(C_SOURCES)))
+C_ELF=$(addprefix $(BUILDDIR)/rv32-c-,$(basename $(C_SOURCES)))
 
 
 
