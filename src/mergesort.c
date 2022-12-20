@@ -2,6 +2,7 @@
 #include"../MMIO/mmio.h"
 
 #define MAX_THD 8
+#define MS_THD 7
 #define FRAME_SIZE 128
 #define STACK_SIZE 512
 
@@ -47,68 +48,39 @@ void mergesort(const int l, const int r) {
 
 }
 
-void mergesort41(const int l, const int r) {
+void mergesortN(const int id, const int l, const int r) {
 
-    int m0 = (l+r)/4*0;
-    int m1 = (l+r)/4*1;
-    int m2 = (l+r)/4*2;
-    int m3 = (l+r)/4*3;
-    int m4 = (l+r)/4*4;
+    if(r-l<=1)
+        return;
 
-    fork2(m0,m1,(void*)mergesort,child_frame[0],child_stack[0]+STACK_SIZE);
-    fork2(m1,m2,(void*)mergesort,child_frame[1],child_stack[1]+STACK_SIZE);
-    fork2(m2,m3,(void*)mergesort,child_frame[2],child_stack[2]+STACK_SIZE);
-    fork2(m3,m4,(void*)mergesort,child_frame[3],child_stack[3]+STACK_SIZE);
+    int m = (l+r)/2;
 
-    wait(child_frame[0]);
-    wait(child_frame[1]);
-    wait(child_frame[2]);
-    wait(child_frame[3]);
+    int child_l = 2*id+1, child_r = 2*id+2;
 
-    printLSR('M');
+    if(child_l < MS_THD)
+        fork3(child_l,l,m,(void*)mergesortN,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    else
+        mergesort(l,m);
 
-    merge(m0,m1,m2);
-    merge(m2,m3,m4);
-    merge(m0,m2,m4);
+    if(child_r < MS_THD)
+        fork3(child_r,m,r,(void*)mergesortN,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
+    else
+        mergesort(m,r);
 
-}
+    if(child_l < MS_THD)
+        wait(child_frame[child_l]);
 
-void mergesort42(const int l, const int r) {
+    if(child_r < MS_THD)
+        wait(child_frame[child_r]);
 
-    int m0 = (l+r)/4*0;
-    int m1 = (l+r)/4*1;
-    int m2 = (l+r)/4*2;
-    int m3 = (l+r)/4*3;
-    int m4 = (l+r)/4*4;
-
-    fork2(m0,m1,(void*)mergesort,child_frame[0],child_stack[0]+STACK_SIZE);
-    fork2(m1,m2,(void*)mergesort,child_frame[1],child_stack[1]+STACK_SIZE);
-    fork2(m2,m3,(void*)mergesort,child_frame[2],child_stack[2]+STACK_SIZE);
-    fork2(m3,m4,(void*)mergesort,child_frame[3],child_stack[3]+STACK_SIZE);
-
-    wait(child_frame[0]);
-    wait(child_frame[1]);
-    wait(child_frame[2]);
-    wait(child_frame[3]);
-
-    printLSR('M');
-
-    fork3(m0,m1,m2,(void*)merge,child_frame[0],child_stack[0]+STACK_SIZE);
-    fork3(m2,m3,m4,(void*)merge,child_frame[1],child_stack[1]+STACK_SIZE);
-
-    wait(child_frame[0]);
-    wait(child_frame[1]);
-
-    printLSR('m');
-
-    merge(m0,m2,m4);
+    merge(l,m,r);
 
 }
 
 int main() {
 
     printLSR('S');
-    mergesort42(0,vsz);
+    mergesortN(0,0,vsz);
     printLSR('E');
 
     for(int i = 0; i < vsz-1; ++i) {
