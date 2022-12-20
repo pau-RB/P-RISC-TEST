@@ -1,4 +1,4 @@
-#include "./src/MMIO/mmio.h"
+#include "./MMIO/mmio.h"
 
 #define msz 16
 
