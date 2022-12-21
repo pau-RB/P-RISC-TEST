@@ -2,15 +2,14 @@
 #include"../MMIO/mmio.h"
 #include"../data/vec01.h"
 
-#define MAX_THD 8
 #define QS_THD  7
 #define FRAME_SIZE 128
 #define STACK_SIZE 8192
 
 #define VSZ 2000
 
-char child_stack[MAX_THD][STACK_SIZE]={1};
-char child_frame[MAX_THD][FRAME_SIZE]={1};
+char child_stack[QS_THD][STACK_SIZE]={1};
+char child_frame[QS_THD][FRAME_SIZE]={1};
 
 //////////// HEADERS ////////////
 
@@ -90,26 +89,21 @@ void quicksortN(int vec[], int id, int l, int r) {
 
     int child_l = 2*id+1;
     int child_r = 2*id+2;
+    int frame = id;
 
     int pivot = vec[r-1];
     int m1,m2;
 
     // Partial split (parallel)
-    if(child_l < QS_THD)
-        fork5((int)vec, l, r-1, 2, pivot, (void*)split,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    if(frame < QS_THD)
+        fork5((int)vec, l, r-1, 2, pivot, (void*)split,child_frame[frame],child_stack[frame]+STACK_SIZE);
     else
         m1 = split(vec, l, r-1, 2, pivot);
 
-    if(child_r < QS_THD)
-        fork5((int)vec, l+1, r-1, 2, pivot, (void*)split,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
-    else
-        m2 = split(vec, l+1, r-1, 2, pivot);
+    m2 = split(vec, l+1, r-1, 2, pivot);
 
-    if(child_l < QS_THD)
-        m1 = wait(child_frame[child_l]);
-
-    if(child_r < QS_THD)
-        m2 = wait(child_frame[child_r]);
+    if(frame < QS_THD)
+        m1 = wait(child_frame[frame]);
 
     // Merge split (sequential)
     int m = split(vec, min(m1,m2), max(m1,m2), 1, pivot);
@@ -117,21 +111,19 @@ void quicksortN(int vec[], int id, int l, int r) {
 
     // Recursive sort (parallel)
 
-    if(child_l < QS_THD)
-        fork4((int)vec, child_l, l, m, (void*)quicksortN,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    if(frame < QS_THD)
+        fork4((int)vec, child_l, l, m, (void*)quicksortN,child_frame[frame],child_stack[frame]+STACK_SIZE);
     else
         quicksort(vec, l, m);
 
-    if(child_r < QS_THD)
-        fork4((int)vec, child_r, m+1, r, (void*)quicksortN,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
+    if(frame < QS_THD)
+        quicksortN(vec, child_r, m+1, r);
     else
         quicksort(vec, m+1, r);
 
-    if(child_l < QS_THD)
-        wait(child_frame[child_l]);
+    if(frame < QS_THD)
+        wait(child_frame[frame]);
 
-    if(child_r < QS_THD)
-        wait(child_frame[child_r]);
 
 }
 
