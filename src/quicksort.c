@@ -1,7 +1,8 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
 
-#define MAX_THD 2
+#define MAX_THD 32
+#define QS_THD  31
 #define FRAME_SIZE 128
 #define STACK_SIZE 512
 
@@ -15,13 +16,11 @@ char child_frame[MAX_THD][FRAME_SIZE]={1};
 //////////// HEADERS ////////////
 
 inline void swap(int* a, int* b);
-void heapify(int vec[], int len, int node);
-
-void heapify2L(int vec[], int len, int node);
-void heapify2R(int vec[], int len, int node);
-
-void heapsort();
-void heapsort2();
+inline int min(int a, int b);
+inline int max(int a, int b);
+int split(int vec[], int l, int r, int s, int pivot);
+void quicksort(int vec[], int l, int r);
+void quicksortN(int vec[], int id, int l, int r);
 
 //////////// SEQUENTIAL ////////////
 
@@ -33,168 +32,107 @@ inline void swap(int* a, int* b) {
     *b = t;
 }
 
-// Pre : vec contains a complete binary tree and the subtrees
-//       hanging from node are heaps
-// Post: node is the root of a heap (merge both heaps)
-void heapify(int vec[], int len, int node) {
-
-    int max = node;
-
-    int node_l = 2*node+1;
-    int node_r = 2*node+2;
-
-    if (node_l < len && vec[node_l] > vec[max])
-        max = node_l;
-
-    if (node_r < len && vec[node_r] > vec[max])
-        max = node_r;
-
-    if (max != node) {
-        swap(&vec[node], &vec[max]);
-        heapify(vec, len, max);
-    }
-
+// Pre :
+// Post: min
+inline int min(int a, int b) {
+    if(a < b)
+        return a;
+    else
+        return b;
 }
 
-//////////// PARALLEL ////////////
-
-// Pre : vec contains a complete binary tree and the subtrees
-//       hanging from node and the left child of node are heaps
-//
-//              (?)
-//              / \
-//            (?)  H
-//            / \
-//           H   H
-//
-// Post: node is the root of a heap (merge the three heaps)
-void heapify2L(int vec[], int len, int node) {
-
-    int node_l  = 2*node+1;
-    int node_r  = 2*node+2;
-    int node_ll = 2*node_l+1;
-    int node_lr = 2*node_l+2;
-
-    int max = node;
-    if (node_l < len && vec[node_l] > vec[max])
-        max = node_l;
-    if (node_r < len && vec[node_r] > vec[max])
-        max = node_r;
-    if (node_ll < len && vec[node_ll] > vec[max])
-        max = node_ll;
-    if (node_lr < len && vec[node_lr] > vec[max])
-        max = node_lr;
-
-    if (max != node)
-        swap(&vec[node], &vec[max]);
-
-    if(max == node)
-        heapify(vec, len, node_l);
-    else if (max == node_l)
-        heapify(vec, len, node_l);
-    else if(max == node_r)
-        {
-            fork3((int)vec, len, node_l, &heapify, child_frame[0],child_stack[0]+STACK_SIZE);
-            fork3((int)vec, len, node_r, &heapify, child_frame[1],child_stack[1]+STACK_SIZE);
-            wait(child_frame[0]);
-            wait(child_frame[1]);
-        }
-    else if(max == node_ll)
-        heapify2L(vec, len, node_l);
-    else if(max == node_lr)
-        heapify2R(vec, len, node_l);
-
+// Pre :
+// Post: max
+inline int max(int a, int b) {
+    if(a > b)
+        return a;
+    else
+        return b;
 }
 
-// Pre : vec contains a complete binary tree and the subtrees
-//       hanging from node and the right child of node are heaps
-//
-//              (?)
-//              / \
-//             H  (?)
-//                / \
-//               H   H
-//
-// Post: node is the root of a heap (merge the three heaps)
-void heapify2R(int vec[], int len, int node) {
+// Pre :
+// Post: Splits vec in elements lt and geq than pivot returns first geq
+int split(int vec[], int l, int r, int s, int pivot) {
 
-    int node_l  = 2*node+1;
-    int node_r  = 2*node+2;
-    int node_rl = 2*node_r+1;
-    int node_rr = 2*node_r+2;
+    int i = l;
+    for(int j = l; j < r; j+=s)
+        if(vec[j] < pivot)
+            {swap(&vec[i],&vec[j]); i+=s;}
 
-    int max = node;
-    if (node_l < len && vec[node_l] > vec[max])
-        max = node_l;
-    if (node_r < len && vec[node_r] > vec[max])
-        max = node_r;
-    if (node_rl < len && vec[node_rl] > vec[max])
-        max = node_rl;
-    if (node_rr < len && vec[node_rr] > vec[max])
-        max = node_rr;
-
-    if (max != node)
-        swap(&vec[node], &vec[max]);
-
-    if(max == node)
-        heapify(vec, len, node_r);
-    else if (max == node_l)
-        {
-            fork3((int)vec, len, node_l, &heapify, child_frame[0],child_stack[0]+STACK_SIZE);
-            fork3((int)vec, len, node_r, &heapify, child_frame[1],child_stack[1]+STACK_SIZE);
-            wait(child_frame[0]);
-            wait(child_frame[1]);
-        }
-    else if(max == node_r)
-        heapify(vec, len, node_r);
-    else if(max == node_rl)
-        heapify2L(vec, len, node_r);
-    else if(max == node_rr)
-        heapify2R(vec, len, node_r);
+    return i;
 
 }
 
 //////////// TOP LEVEL ////////////
 
-// Pre : vec contains a set of numbers
-// Post: vec is sorted by standard heapsort
-void heapsort(int vec[], int len) {
+// Pre :
+// Post: The partial vector [l,r) is sorted by recursive quicksort
+void quicksort(int vec[], int l, int r) {
 
-    for(int i = len/2-1; i >= 0; --i)
-        heapify(vec, len, i);
+    if(r-l<=1)
+        return;
 
-    printLSR('m');
+    int m = split(vec, l, r-1, 1, vec[r-1]);
 
-    for (int i = len-1; i >= 0; --i) {
-        swap(&vec[0], &vec[i]);
-        heapify(vec, i, 0);
-    }
+    swap(&vec[m],&vec[r-1]);
+
+    quicksort(vec, l, m);
+    quicksort(vec, m+1, r);
 
 }
 
-// Pre : vec contains a set of numbers
-// Post: vec is sorted by parallel heapsort
-void heapsort2(int vec[], int len) {
+// Pre : Child stack and frames are interpreted as a complete
+//       binary tree and the subtree hanging from id is available
+// Post: The partial vector [l,r) is sorted by double parallel quicksort
+void quicksortN(int vec[], int id, int l, int r) {
 
-    for(int i = len/2-1; i >= 0; --i)
-        heapify(vec, len, i);
+    if(r-l<=1)
+        return;
 
-    printLSR('m');
+    int child_l = 2*id+1;
+    int child_r = 2*id+2;
 
-    for (int i = len-1; i >= 2; i-=2) {
-        if(vec[1]>vec[2]) {
-            swap(&vec[0], &vec[i]);
-            swap(&vec[1], &vec[i-1]);
-            heapify2L(vec, i-1, 0);
-        } else {
-            swap(&vec[0], &vec[i]);
-            swap(&vec[2], &vec[i-1]);
-            heapify2R(vec, i-1, 0);
-        }  
-    }
+    int pivot = vec[r-1];
+    int m1,m2;
 
-    if(vec[0]>vec[1])
-        swap(&vec[0], &vec[1]);
+    // Partial split (parallel)
+    if(child_l < QS_THD)
+        fork5((int)vec, l, r-1, 2, pivot, (void*)split,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    else
+        m1 = split(vec, l, r-1, 2, pivot);
+
+    if(child_r < QS_THD)
+        fork5((int)vec, l+1, r-1, 2, pivot, (void*)split,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
+    else
+        m2 = split(vec, l+1, r-1, 2, pivot);
+
+    if(child_l < QS_THD)
+        m1 = wait(child_frame[child_l]);
+
+    if(child_r < QS_THD)
+        m2 = wait(child_frame[child_r]);
+
+    // Merge split (sequential)
+    int m = split(vec, min(m1,m2), max(m1,m2), 1, pivot);
+    swap(&vec[m],&vec[r-1]);
+
+    // Recursive sort (parallel)
+
+    if(child_l < QS_THD)
+        fork4((int)vec, child_l, l, m, (void*)quicksortN,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    else
+        quicksort(vec, l, m);
+
+    if(child_r < QS_THD)
+        fork4((int)vec, child_r, m+1, r, (void*)quicksortN,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
+    else
+        quicksort(vec, m+1, r);
+
+    if(child_l < QS_THD)
+        wait(child_frame[child_l]);
+
+    if(child_r < QS_THD)
+        wait(child_frame[child_r]);
 
 }
 
@@ -203,7 +141,7 @@ void heapsort2(int vec[], int len) {
 int main() {
 
     printLSR('S');
-    heapsort2(VEC, VSZ);
+    quicksortN(VEC, 0, 0, VSZ);
     printLSR('E');
 
     for(int i = 0; i < VSZ-1; ++i) {

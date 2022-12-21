@@ -62,7 +62,7 @@ void mergesort(int vec[], int scr[], int l, int r) {
 
 // Pre : Child stack and frames are interpreted as a complete
 //       binary tree and the subtree hanging from id is available
-// Post: The partial vector [l,r) is sorted by patallel mergesort
+// Post: The partial vector [l,r) is sorted by parallel mergesort
 void mergesortN(int vec[], int scr[], int id, int l, int r) {
 
     if(r-l<=1)
