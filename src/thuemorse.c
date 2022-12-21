@@ -21,8 +21,8 @@ void thuemorse(int n)
     int i;
 
     for(i = 0; i < n; i++)
-        putchar('0' + compter_uns(i));
-    putchar(10);
+        print_MSG('0' + compter_uns(i));
+    print_MSG(10);
 }
 
 int main()

@@ -1,9 +1,8 @@
-int getchar();
-int putchar(int c);
+#include"../MMIO/mmio.h"
 
 int main() {
   char *s = "Hello, world!\n";
   char *p;
-  for (p = s; p < s + 14; p++) putchar(*p);
+  for (p = s; p < s + 14; p++) print_MSG(*p);
   return 0;
 }

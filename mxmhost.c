@@ -77,9 +77,9 @@ int main() {
   C[0][0] = 0;
   D[0][0] = 0;
 
-  printLSR('S');
+  print_MSR('S');
   mxm((int*)A,(int*)B,(int*)C);
-  printLSR('E');
+  print_MSR('E');
 
   for (int i = 0; i < msz; ++i)
     for (int j = 0; j < msz; ++j)
@@ -89,15 +89,15 @@ int main() {
   for (int i = 0; i < msz; ++i)
     for (int j = 0; j < msz; ++j)
       if(C[i][j]!=D[i][j]) {
-        putchar('F');
-        putchar(i+48);
-        putchar(j+48);
-        putchar(C[i][j]+48);
-        putchar(D[i][j]+48);
+        print_MSG('F');
+        print_HEX(i);
+        print_HEX(j);
+        print_HEX(C[i][j]);
+        print_HEX(D[i][j]);
         return 1;
       }
 
-  putchar('P');
+  print_MSG('P');
 
   return 0;
 }

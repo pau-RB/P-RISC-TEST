@@ -107,15 +107,15 @@ int mandelbrotN(int l, int r, int b, int t) {
 
 int main() {
 
-	printLSR('S');
+	print_MSR('S');
 	int par = mandelbrotN(fromint(-2),fromint(1),fromint(-1),fromint(1));
-    printLSR('E');
+    print_MSR('E');
 
 	int seq = mandelbrot(fromint(-2),fromint(1),fromint(-1),fromint(1));
 
     if(par == seq)
-    	putchar('P');
+    	print_MSG('P');
     else
-    	putchar('F');
+    	print_MSG('F');
 
 }

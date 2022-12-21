@@ -194,17 +194,17 @@ void heapsort2(int vec[], int len) {
 
 int main() {
 
-    printLSR('S');
+    print_MSR('S');
     heapsort2(VEC, VSZ);
-    printLSR('E');
+    print_MSR('E');
 
     for(int i = 0; i < VSZ-1; ++i) {
         if(VEC[i] > VEC[i+1]) {
-            putchar('F');
+            print_MSG('F');
             return -1;
         }
     }
 
-    putchar('P');
+    print_MSG('P');
 
 }

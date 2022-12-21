@@ -29,9 +29,9 @@ int main() {
     int res3 = wait(child_frame_3);
     int res4 = wait(child_frame_4);
 
-    putchar(48+(char)res1);
-    putchar(48+(char)res2);
-    putchar(48+(char)res3);
-    putchar(48+(char)res4);
+    print_HEX(res1);
+    print_HEX(res2);
+    print_HEX(res3);
+    print_HEX(res4);
 
 }

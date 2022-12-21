@@ -131,17 +131,17 @@ void quicksortN(int vec[], int id, int l, int r) {
 
 int main() {
 
-    printLSR('S');
+    print_MSR('S');
     quicksortN(VEC, 0, 0, VSZ);
-    printLSR('E');
+    print_MSR('E');
 
     for(int i = 0; i < VSZ-1; ++i) {
         if(VEC[i] > VEC[i+1]) {
-            putchar('F');
+            print_MSG('F');
             return -1;
         }
     }
 
-    putchar('P');
+    print_MSG('P');
 
 }
