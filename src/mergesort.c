@@ -2,8 +2,7 @@
 #include"../MMIO/mmio.h"
 #include"../data/vec01.h"
 
-#define MAX_THD 8
-#define MS_THD  7
+#define MS_THD  3
 #define FRAME_SIZE 128
 #define STACK_SIZE 1024
 
@@ -11,8 +10,8 @@
 
 int SCR[VSZ] = {1};
 
-char child_stack[MAX_THD][STACK_SIZE]={1};
-char child_frame[MAX_THD][FRAME_SIZE]={1};
+char child_stack[MS_THD][STACK_SIZE]={1};
+char child_frame[MS_THD][FRAME_SIZE]={1};
 
 //////////// HEADERS ////////////
 
@@ -72,22 +71,17 @@ void mergesortN(int vec[], int scr[], int id, int l, int r) {
 
     int child_l = 2*id+1;
     int child_r = 2*id+2;
+    int frame   = id;
 
-    if(child_l < MS_THD)
-        fork5((int)vec,(int)scr,child_l,l,m,(void*)mergesortN,child_frame[child_l],child_stack[child_l]+STACK_SIZE);
+    if(frame < MS_THD)
+        fork5((int)vec,(int)scr,child_l,l,m,(void*)mergesortN,child_frame[frame],child_stack[frame]+STACK_SIZE);
     else
-        mergesort(vec,scr,l,m);
+        mergesortN(vec,scr,child_l,l,m);
 
-    if(child_r < MS_THD)
-        fork5((int)vec,(int)scr,child_r,m,r,(void*)mergesortN,child_frame[child_r],child_stack[child_r]+STACK_SIZE);
-    else
-        mergesort(vec,scr,m,r);
+    mergesortN(vec,scr,child_r,m,r);
 
-    if(child_l < MS_THD)
-        wait(child_frame[child_l]);
-
-    if(child_r < MS_THD)
-        wait(child_frame[child_r]);
+    if(frame < MS_THD)
+        wait(child_frame[frame]);
 
     merge(vec,scr,l,m,r);
 
