@@ -2,14 +2,13 @@
 #include"../MMIO/mmio.h"
 #include"../data/vec01.h"
 
-#define MAX_THD 2
 #define FRAME_SIZE 128
 #define STACK_SIZE 1024
 
 #define VSZ 2000
 
-char child_stack[MAX_THD][STACK_SIZE]={1};
-char child_frame[MAX_THD][FRAME_SIZE]={1};
+char child_stack[STACK_SIZE]={1};
+char child_frame[FRAME_SIZE]={1};
 
 //////////// HEADERS ////////////
 
@@ -93,10 +92,9 @@ void heapify2L(int vec[], int len, int node) {
         heapify(vec, len, node_l);
     else if(max == node_r)
         {
-            fork3((int)vec, len, node_l, &heapify, child_frame[0],child_stack[0]+STACK_SIZE);
-            fork3((int)vec, len, node_r, &heapify, child_frame[1],child_stack[1]+STACK_SIZE);
-            wait(child_frame[0]);
-            wait(child_frame[1]);
+            fork3((int)vec, len, node_l, &heapify, child_frame, child_stack+STACK_SIZE);
+            heapify(vec, len, node_r);
+            wait(child_frame);
         }
     else if(max == node_ll)
         heapify2L(vec, len, node_l);
@@ -139,10 +137,9 @@ void heapify2R(int vec[], int len, int node) {
         heapify(vec, len, node_r);
     else if (max == node_l)
         {
-            fork3((int)vec, len, node_l, &heapify, child_frame[0],child_stack[0]+STACK_SIZE);
-            fork3((int)vec, len, node_r, &heapify, child_frame[1],child_stack[1]+STACK_SIZE);
-            wait(child_frame[0]);
-            wait(child_frame[1]);
+            fork3((int)vec, len, node_l, &heapify, child_frame, child_stack+STACK_SIZE);
+            heapify(vec, len, node_r);
+            wait(child_frame);
         }
     else if(max == node_r)
         heapify(vec, len, node_r);
