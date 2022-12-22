@@ -1,4 +1,4 @@
-.equ msz,16
+.equ msz,32
 .equ thd,4
 .equ str,4*msz/thd
 
@@ -54,7 +54,8 @@ for_j:
 	addi	t4,t4,-1
 	bnez	t4,for_k
 
-	addi	a1,a1,(-4*msz*msz)	# ++i
+	addi	a1,a1,(-2*msz*msz)	# ++i
+	addi	a1,a1,(-2*msz*msz)
 	addi	a2,a2,(+4*msz)
 	addi	t3,t3,-1
 	bnez	t3,for_i
