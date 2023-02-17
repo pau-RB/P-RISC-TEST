@@ -71,7 +71,84 @@ inline int wait(char *child_frame)
 
 //////////// Block ////////////
 
-int block1D(int x0, int x1, int dx, int (*shader_func)(int), int (*reduce_func)(int,int)) {
+int block1D(int x0, int x1, int dx, int (*shader_func)(int)) {
+
+	int res = 0;
+	int sid = 0;
+
+	for(int i = 0; i < ST_MAX; ++i)
+		st_busy[i] = 0;
+
+	for (int i=x0; i<x1; i+=dx) {
+		if(st_busy[sid])
+			wait(st_frame[sid]);
+		fork1(i,(void*)shader_func,st_frame[sid],st_stack[sid]+ST_STACK_SIZE);
+		st_busy[sid] = 1; sid = (sid+1)%ST_MAX;
+	}
+
+	for(sid = 0; sid < ST_MAX; ++sid)
+		if(st_busy[sid])
+			wait(st_frame[sid]);
+
+	return res;
+
+}
+
+int block2D(int x0, int x1, int dx, int y0, int y1, int dy, int (*shader_func)(int,int)) {
+
+	int res = 0;
+	int sid = 0;
+
+	for(int i = 0; i < ST_MAX; ++i)
+		st_busy[i] = 0;
+
+	for (int i=x0; i<x1; i+=dx) {
+		for (int j=y0; j<y1; j+=dy) {
+			if(st_busy[sid])
+				wait(st_frame[sid]);
+			fork2(i,j,(void*)shader_func,st_frame[sid],st_stack[sid]+ST_STACK_SIZE);
+			st_busy[sid] = 1; sid = (sid+1)%ST_MAX;
+		}
+	}
+
+	for(sid = 0; sid < ST_MAX; ++sid)
+		if(st_busy[sid])
+			res = wait(st_frame[sid]);
+
+	return res;
+
+}
+
+int block3D(int x0, int x1, int dx, int y0, int y1, int dy, int z0, int z1, int dz, int (*shader_func)(int,int,int)) {
+
+	int res = 0;
+	int sid = 0;
+
+	for(int i = 0; i < ST_MAX; ++i)
+		st_busy[i] = 0;
+
+	for (int i=x0; i<x1; i+=dx) {
+		for (int j=y0; j<y1; j+=dy) {
+			for (int k=z0; k<z1; k+=dz) {
+				if(st_busy[sid])
+					res = wait(st_frame[sid]);
+				fork3(i,j,k,(void*)shader_func,st_frame[sid],st_stack[sid]+ST_STACK_SIZE);
+				st_busy[sid] = 1; sid = (sid+1)%ST_MAX;
+			}
+		}
+	}
+
+	for(sid = 0; sid < ST_MAX; ++sid)
+		if(st_busy[sid])
+			res = wait(st_frame[sid]);
+
+	return res;
+
+}
+
+//////////// Reduce ////////////
+
+int reduce1D(int x0, int x1, int dx, int (*shader_func)(int), int (*reduce_func)(int,int)) {
 
 	int res = 0;
 	int sid = 0;
@@ -94,7 +171,7 @@ int block1D(int x0, int x1, int dx, int (*shader_func)(int), int (*reduce_func)(
 
 }
 
-int block2D(int x0, int x1, int dx, int y0, int y1, int dy, int (*shader_func)(int,int), int (*reduce_func)(int,int)) {
+int reduce2D(int x0, int x1, int dx, int y0, int y1, int dy, int (*shader_func)(int,int), int (*reduce_func)(int,int)) {
 
 	int res = 0;
 	int sid = 0;
@@ -119,7 +196,7 @@ int block2D(int x0, int x1, int dx, int y0, int y1, int dy, int (*shader_func)(i
 
 }
 
-int block3D(int x0, int x1, int dx, int y0, int y1, int dy, int z0, int z1, int dz, int (*shader_func)(int,int,int), int (*reduce_func)(int,int)) {
+int reduce3D(int x0, int x1, int dx, int y0, int y1, int dy, int z0, int z1, int dz, int (*shader_func)(int,int,int), int (*reduce_func)(int,int)) {
 
 	int res = 0;
 	int sid = 0;

@@ -53,7 +53,7 @@ int mandelbrot(int l, int r, int b, int t) {
 
 int mandelbrotN (int l, int r, int b, int t) {
 	int sum (int a, int b) {return a+b;};
-	return block2D(l,r,STEP,b,t,STEP,&inside,&sum);
+	return reduce2D(l,r,STEP,b,t,STEP,&inside,&sum);
 }
 
 int main() {
