@@ -1,18 +1,12 @@
-int* MSG_ADDR = (int *)0x003fff0;
-int* HEX_ADDR = (int *)0x003fff4;
-int* MSR_ADDR = (int *)0x003fff8;
+#define MSG_ADDR 0x0ffffff0
+#define HEX_ADDR 0x0ffffff4
+#define MSR_ADDR 0x0ffffff8
 
-int print_MSG(char c) {
-  *MSG_ADDR = (int)c;
-  return c;
-}
+void print_MSG(char c)
+  {*(int*)MSG_ADDR = (int)c;}
 
-int print_HEX(int c) {
-  *HEX_ADDR = c;
-  return c;
-}
+void print_HEX(int c)  
+  {*(int*)HEX_ADDR = c;}
 
-int print_MSR(char c) {
-  *MSR_ADDR = (int)c;
-  return c;
-}
+void print_MSR(char c)
+  {*(int*)MSR_ADDR = (int)c;}
