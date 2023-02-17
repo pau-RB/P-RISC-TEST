@@ -1,8 +1,8 @@
+#define ST_MAX  16
+
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
 #include"../data/mat_0032_001.h"
-
-#define MM_THD  16
 
 int C[MSZ][MSZ] = {1};
 
