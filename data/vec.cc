@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
 
 	int num_vec = (1 < argc) ? std::stoi(argv[1]) : 1;
-	int len_vec = (2 < argc) ? std::stoi(argv[2]) : 10;
+	int len_vec = (2 < argc) ? std::stoi(argv[2]) : 1000;
 
 	srand((unsigned) time(NULL));
 

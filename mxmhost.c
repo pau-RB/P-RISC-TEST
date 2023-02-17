@@ -1,5 +1,5 @@
 #include "./MMIO/mmio.h"
-#include "./data/mat01.h"
+#include "./data/mat_0032_001.h"
 
 int C[MSZ][MSZ] = {1};
 int D[MSZ][MSZ] = {1};
