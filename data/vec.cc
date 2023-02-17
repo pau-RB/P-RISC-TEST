@@ -5,8 +5,9 @@
 
 int main(int argc, char *argv[]) {
 
-	int num_vec = (1 < argc) ? std::stoi(argv[1]) : 1;
-	int len_vec = (2 < argc) ? std::stoi(argv[2]) : 1000;
+	std::string dir = (1 < argc) ? argv[1] : "data";
+	int num_vec = (2 < argc) ? std::stoi(argv[2]) : 1;
+	int len_vec = (3 < argc) ? std::stoi(argv[3]) : 1000;
 
 	srand((unsigned) time(NULL));
 
@@ -17,7 +18,7 @@ int main(int argc, char *argv[]) {
 
 		std::ofstream vec_file;
 
-		vec_file.open (path);
+		vec_file.open(dir+"/"+path);
 		vec_file << "#define VSZ " << len_vec << std::endl;
 		vec_file << "int VEC[" << len_vec << "] = {";
 
