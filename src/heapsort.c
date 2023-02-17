@@ -1,11 +1,9 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
-#include"../data/vec01.h"
+#include"../data/vec_0001_001.h"
 
 #define FRAME_SIZE 128
 #define STACK_SIZE 1024
-
-#define VSZ 2000
 
 char child_stack[STACK_SIZE]={1};
 char child_frame[FRAME_SIZE]={1};

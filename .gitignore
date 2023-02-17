@@ -1,5 +1,6 @@
 API/*.o
 MMIO/*.o
+data/*.out
 build
 dump
 hex

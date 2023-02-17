@@ -1,12 +1,10 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
-#include"../data/vec01.h"
+#include"../data/vec_0001_001.h"
 
 #define QS_THD  7
 #define FRAME_SIZE 128
 #define STACK_SIZE 8192
-
-#define VSZ 2000
 
 char child_stack[QS_THD][STACK_SIZE]={1};
 char child_frame[QS_THD][FRAME_SIZE]={1};

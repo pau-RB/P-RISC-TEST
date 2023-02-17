@@ -1,12 +1,10 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
-#include"../data/vec01.h"
+#include"../data/vec_0001_001.h"
 
 #define MS_THD  3
 #define FRAME_SIZE 128
 #define STACK_SIZE 1024
-
-#define VSZ 2000
 
 int SCR[VSZ] = {1};
 
