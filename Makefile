@@ -62,10 +62,15 @@ mat: $(DATDIR)/mat.cc
 
 VEC: $(DATDIR)/vec.cc
 	g++ $(DATDIR)/vec.cc -o $(DATDIR)/vec.out
+	$(DATDIR)/vec.out $(DATDIR) 10   10000
+	$(DATDIR)/vec.out $(DATDIR) 10  100000
 	$(DATDIR)/vec.out $(DATDIR) 10 1000000
 MAT: $(DATDIR)/mat.cc
 	g++ $(DATDIR)/mat.cc -o $(DATDIR)/mat.out
+	$(DATDIR)/mat.out $(DATDIR) 10  64
+	$(DATDIR)/mat.out $(DATDIR) 10 128
 	$(DATDIR)/mat.out $(DATDIR) 10 256
+	$(DATDIR)/mat.out $(DATDIR) 10 512
 
 # build actual tests
 
