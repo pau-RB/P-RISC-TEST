@@ -94,7 +94,7 @@ $(BUILDDIR)/rv32-s-%: $(ELF2HEX)/elf2hex $(SRCDIR)/%.S rv32-init.o rv32-mmio.o $
 	$(ELF2HEX)/elf2hex $(BUILDDIR)/rv32-s-$* 0 16G $(HEXDIR)/rv32-s-$*.hex
 	rm rv32-intermeidate.o
 
-$(BUILDDIR)/rv32-c-%: $(ELF2HEX)/elf2hex $(SRCDIR)/%.c rv32-init.o rv32-mmio.o $(MMIODIR)/mmio.ld rv32-fork.o rv32-wait.o $(APIDIR)/api.h
+$(BUILDDIR)/rv32-c-%: $(ELF2HEX)/elf2hex $(SRCDIR)/%.c rv32-init.o rv32-mmio.o $(MMIODIR)/mmio.ld rv32-fork.o rv32-wait.o $(APIDIR)/api.h $(APIDIR)/fixedpoint.h
 	mkdir -p $(BUILDDIR)
 	mkdir -p $(DUMPDIR)
 	mkdir -p $(HEXDIR)
