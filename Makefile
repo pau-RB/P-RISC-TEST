@@ -10,7 +10,7 @@ HEXDIR=hex
 
 ELF2HEX=./elf2hex
 
-RISCVCC32=riscv64-unknown-elf-gcc -O2 -march=rv32im -mabi=ilp32 -static -nostdlib -nostartfiles -mcmodel=medany
+RISCVCC32=riscv64-unknown-elf-gcc -O3 -march=rv32im -mabi=ilp32 -static -nostdlib -nostartfiles -fno-builtin -mcmodel=medany
 RISCVOBJD=riscv64-unknown-elf-objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init
 
 MXM_SOURCES=$(notdir $(wildcard $(MXMDIR)/*.S))
