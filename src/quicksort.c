@@ -2,21 +2,16 @@
 #include"../MMIO/mmio.h"
 #include"../data/vec_0001_001.h"
 
-#define QS_THD  7
+#define QS_THD  31
+#define SS_THD  7
 #define FRAME_SIZE 128
 #define STACK_SIZE 8192
 
-char child_stack[QS_THD][STACK_SIZE]={1};
-char child_frame[QS_THD][FRAME_SIZE]={1};
+char child_stack[((QS_THD>SS_THD)?(QS_THD):(SS_THD))][STACK_SIZE]={1};
+char child_frame[((QS_THD>SS_THD)?(QS_THD):(SS_THD))][FRAME_SIZE]={1};
 
-//////////// HEADERS ////////////
-
-inline void swap(int* a, int* b);
-inline int min(int a, int b);
-inline int max(int a, int b);
-int split(int vec[], int l, int r, int s, int pivot);
-void quicksort(int vec[], int l, int r);
-void quicksortN(int vec[], int id, int l, int r);
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
 
 //////////// SEQUENTIAL ////////////
 
@@ -29,99 +24,70 @@ inline void swap(int* a, int* b) {
 }
 
 // Pre :
-// Post: min
-inline int min(int a, int b) {
-    if(a < b)
-        return a;
-    else
-        return b;
-}
+// Post: Splits arr in elements lte and gt than pivot returns first gt
+int split(int arr[], int len, int s, int pivot) {
 
-// Pre :
-// Post: max
-inline int max(int a, int b) {
-    if(a > b)
-        return a;
-    else
-        return b;
-}
-
-// Pre :
-// Post: Splits vec in elements lt and geq than pivot returns first geq
-int split(int vec[], int l, int r, int s, int pivot) {
-
-    int i = l;
-    for(int j = l; j < r; j+=s)
-        if(vec[j] < pivot)
-            {swap(&vec[i],&vec[j]); i+=s;}
-
+    int i = 0;
+    for(int j = 0; j < len; j+=s)
+        if(arr[j] <= pivot)
+            {swap(&arr[i],&arr[j]); i+=s;}
     return i;
 
 }
 
-//////////// TOP LEVEL ////////////
+// Pre :
+// Post: Splits arr in elements lt and geq than pivot returns first geq
+int splitN(int id, int arr[], int len, int s, int pivot) {
+
+    if(id < SS_THD && s < len)
+    {
+        int child_l = 2*id+1;
+        int child_r = 2*id+2;
+                 fork5 (child_l, (int) &arr[0], len  , 2*s, pivot, (void*)splitN, child_frame[id], child_stack[id]+STACK_SIZE); 	 
+        int m1 = splitN(child_r,       &arr[s], len-s, 2*s, pivot);
+        int m2 = wait(child_frame[id]);
+        return split(&arr[MIN(m1,m2)], MIN(MAX(m1,m2),len)-MIN(m1,m2), s, pivot) + MIN(m1,m2);
+    }
+    else
+        return split(arr, len, s, pivot);
+
+}
+
+//////////// PARALLEL ////////////
 
 // Pre :
 // Post: The partial vector [l,r) is sorted by recursive quicksort
-void quicksort(int vec[], int l, int r) {
+void quicksort(int arr[], int len) {
 
-    if(r-l<=1)
+    if(len<=1)
         return;
 
-    int m = split(vec, l, r-1, 1, vec[r-1]);
-
-    swap(&vec[m],&vec[r-1]);
-
-    quicksort(vec, l, m);
-    quicksort(vec, m+1, r);
+    int m = split(arr, len-1, 1, arr[len-1]);
+    swap(&arr[m],&arr[len-1]);
+    quicksort(&arr[0], m    );
+    quicksort(&arr[m], len-m);
 
 }
 
 // Pre : Child stack and frames are interpreted as a complete
 //       binary tree and the subtree hanging from id is available
 // Post: The partial vector [l,r) is sorted by double parallel quicksort
-void quicksortN(int vec[], int id, int l, int r) {
+void quicksortN(int id, int arr[], int len) {
 
-    if(r-l<=1)
+    if(len<=1)
         return;
 
-    int child_l = 2*id+1;
-    int child_r = 2*id+2;
-    int frame = id;
-
-    int pivot = vec[r-1];
-    int m1,m2;
-
-    // Partial split (parallel)
-    if(frame < QS_THD)
-        fork5((int)vec, l, r-1, 2, pivot, (void*)split,child_frame[frame],child_stack[frame]+STACK_SIZE);
+    if(id < QS_THD)
+    {
+        int m = splitN(id, arr, len-1, 1, arr[len-1]);
+        int child_l = 2*id+1;
+        int child_r = 2*id+2;
+        fork3     (child_l, (int) &arr[0], m    , (void*)quicksortN, child_frame[id], child_stack[id]+STACK_SIZE);
+        quicksortN(child_r,       &arr[m], len-m);
+        wait(child_frame[id]);
+    }
     else
-        m1 = split(vec, l, r-1, 2, pivot);
-
-    m2 = split(vec, l+1, r-1, 2, pivot);
-
-    if(frame < QS_THD)
-        m1 = wait(child_frame[frame]);
-
-    // Merge split (sequential)
-    int m = split(vec, min(m1,m2), max(m1,m2), 1, pivot);
-    swap(&vec[m],&vec[r-1]);
-
-    // Recursive sort (parallel)
-
-    if(frame < QS_THD)
-        fork4((int)vec, child_l, l, m, (void*)quicksortN,child_frame[frame],child_stack[frame]+STACK_SIZE);
-    else
-        quicksort(vec, l, m);
-
-    if(frame < QS_THD)
-        quicksortN(vec, child_r, m+1, r);
-    else
-        quicksort(vec, m+1, r);
-
-    if(frame < QS_THD)
-        wait(child_frame[frame]);
-
+        quicksort(arr,len);
 
 }
 
@@ -130,7 +96,7 @@ void quicksortN(int vec[], int id, int l, int r) {
 int main() {
 
     print_MSR('S');
-    quicksortN(VEC, 0, 0, VSZ);
+    quicksortN(0,VEC, VSZ);
     print_MSR('E');
 
     for(int i = 0; i < VSZ-1; ++i) {
