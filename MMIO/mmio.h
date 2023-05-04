@@ -7,4 +7,6 @@ int print_HEX(int c);
 
 int print_MSR(char c);
 
+int print_CTR(char c);
+
 #endif

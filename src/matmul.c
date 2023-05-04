@@ -22,6 +22,7 @@ int main() {
 	print_MSR('S');
 	block2D(0,MSZ,16,0,MSZ,16,&mmt16);
 	print_MSR('E');
+	print_CTR('E');
 
 	// Sequential AxBt
 
