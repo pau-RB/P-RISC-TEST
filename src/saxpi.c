@@ -4,13 +4,13 @@
 #include"../API/api.h"
 #include"../MMIO/mmio.h"
 #include"../API/fixedpoint.h"
-#include"../data/vec_0010_001.h"
+#include"../data/bivec_0010_001.h"
 
 int Z[VSZ] = {1};
 
 int saxpi() {
 	for (int i = 0; i < VSZ-SEG_SZ; ++i)
-		Z[i] = fadd(VEC[i],fmul(itof(73),VEC[VSZ-i]));
+		Z[i] = fadd(VECX[i],fmul(itof(73),VECY[i]));
 }
 
 int main() {
@@ -19,7 +19,7 @@ int main() {
 
 	int saxpiSZ(int I) {
 		for (int i = I; i < I+SEG_SZ; ++i)
-			Z[i] = fadd(VEC[i],fmul(itof(73),VEC[VSZ-i]));
+			Z[i] = fadd(VECX[i],fmul(itof(73),VECY[i]));
 	}
 
 	// Parallel SAXPI
@@ -29,11 +29,9 @@ int main() {
 
 	// Check SAXPI
 	for (int i = 0; i < VSZ-SEG_SZ; ++i)
-		if(Z[i] != fadd(VEC[i],fmul(itof(73),VEC[VSZ-i]))) {
+		if(Z[i] != fadd(VECX[i],fmul(itof(73),VECY[i]))) {
 			print_MSG('F');
 			print_HEX(i);
-			print_HEX(Z[i]);
-			print_HEX(VEC[i]+73*VEC[VSZ-i]);
 			return 1;
 		}
 

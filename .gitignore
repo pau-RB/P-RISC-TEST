@@ -2,6 +2,7 @@ API/*.o
 MMIO/*.o
 data/*.out
 data/vec_*_*.h
+data/bivec_*_*.h
 data/mat_*_*.h
 build
 dump

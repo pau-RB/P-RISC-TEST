@@ -11,7 +11,7 @@ HEXDIR=hex
 ELF2HEX=./elf2hex
 
 RISCVCC32=riscv64-unknown-elf-gcc -O3 -march=rv32im -mabi=ilp32 -static -nostdlib -nostartfiles -fno-builtin -mcmodel=medany
-RISCVOBJD=riscv64-unknown-elf-objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init
+RISCVOBJD=riscv64-unknown-elf-objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 
 MXM_SOURCES=$(notdir $(wildcard $(MXMDIR)/*.S))
 MXM_ELF=$(addprefix $(BUILDDIR)/rv32-mxm-,$(basename $(MXM_SOURCES)))
@@ -25,8 +25,8 @@ C_ELF=$(addprefix $(BUILDDIR)/rv32-c-,$(basename $(C_SOURCES)))
 # Top-level rules
 
 all: data build
-data: vec mat
-DATA: VEC MAT
+data: vec bivec mat
+DATA: VEC BIVEC MAT
 build: $(sort $(MXM_ELF) $(S_ELF) $(C_ELF))
 
 # Build dependencies
@@ -54,6 +54,11 @@ rv32-mxmhost.o: mxmhost.c
 vec: $(DATDIR)/vec.cc
 	g++ $(DATDIR)/vec.cc -o $(DATDIR)/vec.out
 	$(DATDIR)/vec.out $(DATDIR) 10 1000
+
+bivec: $(DATDIR)/bivec.cc
+	g++ $(DATDIR)/bivec.cc -o $(DATDIR)/bivec.out
+	$(DATDIR)/bivec.out $(DATDIR) 10 1000
+
 mat: $(DATDIR)/mat.cc
 	g++ $(DATDIR)/mat.cc -o $(DATDIR)/mat.out
 	$(DATDIR)/mat.out $(DATDIR) 10 32
@@ -65,6 +70,13 @@ VEC: $(DATDIR)/vec.cc
 	$(DATDIR)/vec.out $(DATDIR) 10   10000
 	$(DATDIR)/vec.out $(DATDIR) 10  100000
 	$(DATDIR)/vec.out $(DATDIR) 10 1000000
+
+BIVEC: $(DATDIR)/bivec.cc
+	g++ $(DATDIR)/bivec.cc -o $(DATDIR)/vec.out
+	$(DATDIR)/bivec.out $(DATDIR) 10   10000
+	$(DATDIR)/bivec.out $(DATDIR) 10  100000
+	$(DATDIR)/bivec.out $(DATDIR) 10 1000000
+
 MAT: $(DATDIR)/mat.cc
 	g++ $(DATDIR)/mat.cc -o $(DATDIR)/mat.out
 	$(DATDIR)/mat.out $(DATDIR) 10  64
@@ -111,6 +123,7 @@ clean:
 	rm -rf build
 	rm -rf dump
 	rm -rf hex
+	rm -rf $(DATDIR)/bivec_*_*.h
 	rm -rf $(DATDIR)/vec_*_*.h
 	rm -rf $(DATDIR)/mat_*_*.h
 	rm -rf $(DATDIR)/*.out
