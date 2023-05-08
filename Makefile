@@ -72,7 +72,7 @@ VEC: $(DATDIR)/vec.cc
 	$(DATDIR)/vec.out $(DATDIR) 10 1000000
 
 BIVEC: $(DATDIR)/bivec.cc
-	g++ $(DATDIR)/bivec.cc -o $(DATDIR)/vec.out
+	g++ $(DATDIR)/bivec.cc -o $(DATDIR)/bivec.out
 	$(DATDIR)/bivec.out $(DATDIR) 10   10000
 	$(DATDIR)/bivec.out $(DATDIR) 10  100000
 	$(DATDIR)/bivec.out $(DATDIR) 10 1000000
