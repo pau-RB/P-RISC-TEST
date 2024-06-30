@@ -13,8 +13,6 @@ char child_frame[((QS_THD>SS_THD)?(QS_THD):(SS_THD))][FRAME_SIZE]={1};
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-//////////// SEQUENTIAL ////////////
-
 // Pre :
 // Post: swap
 inline void swap(int* a, int* b) {
@@ -52,8 +50,6 @@ int splitN(int id, int arr[], int len, int s, int pivot) {
         return split(arr, len, s, pivot);
 
 }
-
-//////////// PARALLEL ////////////
 
 // Pre :
 // Post: The partial vector [l,r) is sorted by recursive quicksort

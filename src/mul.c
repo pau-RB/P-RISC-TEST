@@ -1,3 +1,5 @@
+#include"../MMIO/mmio.h"
+
 int main() {
   long long int a = -6;
   long long int b = 7;
@@ -5,6 +7,8 @@ int main() {
   long long int d = 17;
   short         e = 3;
   unsigned int  f = 4;
+
+  print_MSR('S');
 
   asm("li t1,42\n"
       "li t2,47\n"
@@ -247,6 +251,8 @@ int main() {
       "divu   a0,t1,t2\n"
       "rem    a0,t1,t2\n"
       "remu   a0,t1,t2\n");
+
+  print_MSR('E');
 
   return (a*b>>7) & (c*d>>6) | (c*a<<3) ^ ((long long int)e*(long long int)f)>>4;
 }

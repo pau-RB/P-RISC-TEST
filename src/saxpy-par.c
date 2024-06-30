@@ -1,0 +1,37 @@
+#define ST_MAX  16
+#define SEG_SZ  256
+
+#include"../API/api.h"
+#include"../MMIO/mmio.h"
+#include"../API/fixedpoint.h"
+#include"../data/bivec_0010_001.h"
+
+int Z[VSZ] = {1};
+
+int main() {
+
+	Z[0] = 0;
+
+	int saxpySZ(int I) {
+		for (int i = I; i < I+SEG_SZ; ++i)
+			Z[i] = fadd(VECX[i],fmul(itof(73),VECY[i]));
+	}
+
+	// Parallel SAXPY
+	print_MSR('S');
+	block1D(0,VSZ-SEG_SZ,SEG_SZ,&saxpySZ);
+	print_MSR('E');
+
+	// Check SAXPY
+	for (int i = 0; i < VSZ-SEG_SZ; ++i)
+		if(Z[i] != fadd(VECX[i],fmul(itof(73),VECY[i]))) {
+			print_MSG('F');
+			print_HEX(i);
+			return 1;
+		}
+
+	print_MSG('P');
+
+	return 0;
+
+}

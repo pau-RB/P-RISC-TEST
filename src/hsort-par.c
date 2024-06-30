@@ -16,7 +16,6 @@ void heapify(int vec[], int len, int node);
 void heapify2L(int vec[], int len, int node);
 void heapify2R(int vec[], int len, int node);
 
-void heapsort();
 void heapsort2();
 
 //////////// SEQUENTIAL ////////////
@@ -149,20 +148,6 @@ void heapify2R(int vec[], int len, int node) {
 }
 
 //////////// TOP LEVEL ////////////
-
-// Pre : vec contains a set of numbers
-// Post: vec is sorted by standard heapsort
-void heapsort(int vec[], int len) {
-
-    for(int i = len/2-1; i >= 0; --i)
-        heapify(vec, len, i);
-
-    for (int i = len-1; i >= 0; --i) {
-        swap(&vec[0], &vec[i]);
-        heapify(vec, i, 0);
-    }
-
-}
 
 // Pre : vec contains a set of numbers
 // Post: vec is sorted by parallel heapsort

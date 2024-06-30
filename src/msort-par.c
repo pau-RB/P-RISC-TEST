@@ -14,7 +14,6 @@ char child_frame[MS_THD][FRAME_SIZE]={1};
 //////////// HEADERS ////////////
 
 void merge(int vec[], int scr[], int l, int m, int r);
-void mergesort(int vec[], int scr[], int l, int r);
 void mergesortN(int vec[], int scr[], int id, int l, int r);
 
 //////////// MERGESORT ////////////
@@ -40,20 +39,6 @@ void merge(int vec[], int scr[], int l, int m, int r) {
 
     for (int i = 0; i < size; ++i)
         vec[l+i] = scr[l+i];
-
-}
-
-// Pre : -
-// Post: The partial vector [l,r) is sorted by sequential mergesort
-void mergesort(int vec[], int scr[], int l, int r) {
-
-    if(r-l<=1)
-        return;
-    int m = (l+r)/2;
-
-    mergesort(vec,scr,l,m);
-    mergesort(vec,scr,m,r);
-    merge(vec,scr,l,m,r);
 
 }
 
